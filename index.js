@@ -9,22 +9,14 @@ const options = {
  all: true, // Return all resolved addresses
 };
 
-// Calling dns.lookup() for a hostname and displaying the results in the console
-dns.lookup('example.com', options, (err, addresses) => {
- if (err) {
-    console.error('Error:', err);
- } else {
-    console.log('addresses:', addresses);
- }
-});
 
 // Basic Configuration
 const port = process.env.PORT || 3000;
-
+let id=0
 app.use(cors());
-app.use(bp.json({extended:true}))
+app.use(bp.urlencoded({extended:true}))
 app.use('/public', express.static(`${process.cwd()}/public`));
-
+let mapit={}
 app.get('/', function(req, res) {
   res.sendFile(process.cwd() + '/views/index.html');
 });
@@ -32,9 +24,40 @@ app.get('/', function(req, res) {
 // Your first API endpoint
 app.post('/api/shorturl', function(req, res) {
   //make shorted version
-  console.log(req.body)
+  let url=req.body.url
+  dns.lookup(url,(err,adr)=>{
+    if(err){
+      //invalid url
+      res.json({ error: 'invalid url' })
+    }
+    else{
+      //valid
+      id++;
+      mapit[id]=url;
+      let obj={ original_url :url, short_url : id}
+      console.log(obj)
+      res.json(obj)
+      
+    }
+  })
 });
-
+app.get('api/shortul/:surl',(req,res)=> {
+  
+  if(!isNaN(req.params.surl)){
+    //valid number
+    if(mapit.hasOwnProperty(req.params.surl)){
+      //shorted
+      res.redirect(mapit[id])
+    }
+    else{
+    res.json({ error: 'invalid url' })}
+    
+    
+  }
+  else{
+    res.json({ error: 'invalid url' })
+  }
+})
 app.listen(port, function() {
   console.log(`Listening on port ${port}`);
 });
