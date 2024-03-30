@@ -48,7 +48,7 @@ app.post('/api/shorturl', function(req, res) {
     }
   })
 });
-app.get('/api/shorturl/',(req,res)=> {
+app.get('/api/shorturl/:surl',(req,res)=> {
   console.log(req.params)
   console.log("iqzd")
   if(!isNaN(req.params.surl)){
